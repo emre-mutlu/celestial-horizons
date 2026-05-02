@@ -257,22 +257,61 @@ footer {
 
 @media (max-width: 768px) {
     .controls-overlay {
-        left: 1rem;
-        right: 1rem;
+        left: 0.5rem;
+        right: 0.5rem;
+        bottom: 0.5rem;
         top: auto;
-        bottom: 1rem;
         width: auto;
-        padding: 0.75rem;
-        gap: 0.75rem;
+        padding: 0.5rem;
+        gap: 0.4rem;
+        border-radius: var(--radius-md);
     }
+    
     header {
         display: none;
     }
-    .palette-item {
-        height: 24px;
+    
+    /* Hide all descriptive labels to save massive amounts of space */
+    .control-group > label {
+        display: none !important;
     }
+    
+    .control-group {
+        gap: 0.25rem;
+    }
+    
+    footer {
+        gap: 0.4rem;
+    }
+    
+    .palette-item {
+        height: 20px;
+    }
+    
     .mode-btn span {
-        padding: 0.35rem;
+        padding: 0.25rem;
         font-size: 0.75rem;
+    }
+    
+    .primary-btn, .secondary-btn {
+        padding: 0.4rem;
+        font-size: 0.8rem;
+        height: 36px;
+    }
+    
+    .input-wrapper input {
+        padding: 0.3rem 0.5rem;
+        font-size: 0.75rem;
+        height: 36px;
+    }
+    
+    #randomSeedBtn {
+        width: 36px;
+        height: 36px;
+    }
+    
+    /* Completely hide the seed input section on mobile */
+    footer section.control-group {
+        display: none !important;
     }
 }
