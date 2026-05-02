@@ -455,7 +455,7 @@ function renderPersona() {
     ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    drawGrid();
+    drawPatchworkGrid(palette);
 
     // Random graphic backdrop elements
     if (rng.boolean(0.5)) {
@@ -473,6 +473,79 @@ function renderPersona() {
     renderHead(cx, cy, scale, palette);
     renderFace(cx, cy, scale, palette);
     renderHair(cx, cy, scale, palette);
+}
+
+function drawPatchworkGrid(palette) {
+    const { ctx, canvas, rng } = state;
+    
+    // Divide the canvas into large patches
+    const cols = rng.int(2, 5);
+    const rows = rng.int(2, 5);
+    const pWidth = canvas.width / cols;
+    const pHeight = canvas.height / rows;
+
+    for (let c = 0; c < cols; c++) {
+        for (let r = 0; r < rows; r++) {
+            const px = c * pWidth;
+            const py = r * pHeight;
+            
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(px, py, pWidth, pHeight);
+            ctx.clip();
+
+            const gridSize = rng.choice([30, 50, 80, 120]);
+            const type = rng.int(0, 3); // 0: dots, 1: lines, 2: crosshairs, 3: blank
+            
+            // Subtle color variation to avoid being too intense
+            const isAccent = rng.boolean(0.15);
+            ctx.fillStyle = isAccent ? palette.detail : '#ffffff';
+            ctx.strokeStyle = isAccent ? palette.detail : '#ffffff';
+            ctx.globalAlpha = rng.range(0.01, 0.04); // Extremely subtle opacity
+            ctx.lineWidth = 1;
+
+            if (type === 0) {
+                // Dots
+                for (let x = px; x < px + pWidth; x += gridSize) {
+                    for (let y = py; y < py + pHeight; y += gridSize) {
+                        ctx.beginPath();
+                        ctx.arc(x, y, 1.0, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+            } else if (type === 1) {
+                // Lines
+                ctx.setLineDash(rng.boolean() ? [2, 4] : []);
+                for (let x = px; x < px + pWidth; x += gridSize) {
+                    ctx.beginPath(); ctx.moveTo(x, py); ctx.lineTo(x, py + pHeight); ctx.stroke();
+                }
+                for (let y = py; y < py + pHeight; y += gridSize) {
+                    ctx.beginPath(); ctx.moveTo(px, y); ctx.lineTo(px + pWidth, y); ctx.stroke();
+                }
+                ctx.setLineDash([]);
+            } else if (type === 2) {
+                // Crosshairs
+                const s = 4;
+                for (let x = px + gridSize/2; x < px + pWidth; x += gridSize) {
+                    for (let y = py + gridSize/2; y < py + pHeight; y += gridSize) {
+                        ctx.beginPath();
+                        ctx.moveTo(x - s, y); ctx.lineTo(x + s, y);
+                        ctx.moveTo(x, y - s); ctx.lineTo(x, y + s);
+                        ctx.stroke();
+                    }
+                }
+            }
+            // type === 3 intentionally left blank for less density
+
+            // Very subtle patch border
+            if (rng.boolean(0.4)) {
+                ctx.globalAlpha = 0.01;
+                ctx.strokeRect(px, py, pWidth, pHeight);
+            }
+
+            ctx.restore();
+        }
+    }
 }
 
 function renderBody(cx, cy, scale, palette) {
