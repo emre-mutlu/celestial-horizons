@@ -122,6 +122,7 @@ button {
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
+    touch-action: manipulation;
 }
 
 #randomSeedBtn {
@@ -164,10 +165,10 @@ button {
 }
 
 .mode-overlay {
-    position: absolute;
+    position: fixed;
     top: 2rem;
     right: 2rem;
-    z-index: 10;
+    z-index: 100;
 }
 
 .mode-toggle {
@@ -176,6 +177,7 @@ button {
 }
 .mode-btn {
     cursor: pointer;
+    touch-action: manipulation;
 }
 .mode-btn input {
     position: absolute;
@@ -282,11 +284,17 @@ footer {
     }
     
     .mode-overlay {
+        position: fixed;
         top: 0.75rem;
-        left: 0.5rem;
-        right: 0.5rem;
+        left: 0;
+        right: 0;
         display: flex;
         justify-content: center;
+        pointer-events: none;
+    }
+    
+    .mode-toggle {
+        pointer-events: auto;
     }
     
     header {
