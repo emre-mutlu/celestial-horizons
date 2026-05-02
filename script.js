@@ -53,7 +53,9 @@ const state = {
     ctx: null,
     seed: Math.random().toString(36).substring(7),
     currentPalette: 0,
-    rng: null
+    rng: null,
+    lightX: null,
+    lightY: null
 };
 
 // --- Initialization ---
@@ -61,9 +63,6 @@ function init() {
     state.canvas = document.getElementById('artCanvas');
     state.ctx = state.canvas.getContext('2d');
     
-    window.addEventListener('resize', resize);
-    resize();
-
     const seedInput = document.getElementById('seedInput');
     const randomSeedBtn = document.getElementById('randomSeedBtn');
     const generateBtn = document.getElementById('generateBtn');
@@ -97,7 +96,9 @@ function init() {
     downloadBtn.onclick = download;
 
     updateUIForMode();
-    render();
+
+    window.addEventListener('resize', resize);
+    resize();
 }
 
 function updateUIForMode() {
@@ -191,22 +192,21 @@ function renderHorizon() {
     const layers = rng.int(3, 8);
     for (let i = 0; i < layers; i++) {
         const layerColor = palette.terrain[rng.int(0, palette.terrain.length - 1)];
-        const layerAlpha = 1 - (i * rng.range(0.05, 0.2));
-        renderMountainLayer(i, layers, layerColor, layerAlpha);
+        renderMountainLayer(i, layers, layerColor, 1.0);
     }
 }
 
 function drawGrid() {
     const { ctx, canvas, rng } = state;
-    const gridSize = rng.choice([40, 50, 60]); 
+    const gridSize = rng.choice([20, 25, 30, 35]); 
     
     // Subtle dots at grid intersections
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
     for(let x=0; x<canvas.width; x+=gridSize) {
         for(let y=0; y<canvas.height; y+=gridSize) {
             if (rng.boolean(0.85)) { 
                 ctx.beginPath();
-                ctx.arc(x, y, rng.range(0.5, 1.5), 0, Math.PI * 2);
+                ctx.arc(x, y, rng.range(0.5, 1.0), 0, Math.PI * 2);
                 ctx.fill();
             }
         }
@@ -216,21 +216,21 @@ function drawGrid() {
     ctx.lineWidth = 1;
     for(let i=0; i<canvas.width; i+=gridSize) {
         if (rng.boolean(0.1)) continue; 
-        ctx.strokeStyle = rng.boolean(0.2) ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.04)';
+        ctx.strokeStyle = rng.boolean(0.2) ? 'rgba(255, 255, 255, 0.06)' : 'rgba(255, 255, 255, 0.02)';
         ctx.setLineDash(rng.boolean(0.5) ? [2, 4] : []);
         ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke();
     }
     for(let i=0; i<canvas.height; i+=gridSize) {
         if (rng.boolean(0.1)) continue;
-        ctx.strokeStyle = rng.boolean(0.2) ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.04)';
+        ctx.strokeStyle = rng.boolean(0.2) ? 'rgba(255, 255, 255, 0.06)' : 'rgba(255, 255, 255, 0.02)';
         ctx.setLineDash(rng.boolean(0.5) ? [2, 4] : []);
         ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(canvas.width, i); ctx.stroke();
     }
     ctx.setLineDash([]); 
 
     // Occasional sci-fi crosshairs
-    const crosshairCount = rng.int(5, 15);
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+    const crosshairCount = rng.int(5, 20);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
     for(let i=0; i<crosshairCount; i++) {
         const cx = Math.floor(rng.range(0, canvas.width) / gridSize) * gridSize;
         const cy = Math.floor(rng.range(0, canvas.height) / gridSize) * gridSize;
@@ -244,16 +244,34 @@ function drawGrid() {
 
 function renderStars(palette) {
     const { ctx, canvas, rng } = state;
-    const count = rng.int(200, 600);
+    // High variability in star density
+    const count = rng.choice([
+        rng.int(30, 80),    // Very sparse
+        rng.int(150, 400),  // Medium
+        rng.int(600, 1200)  // Very dense
+    ]);
     ctx.fillStyle = palette.celestial;
     for (let i = 0; i < count; i++) {
         const x = rng.range(0, canvas.width);
         const y = rng.range(0, canvas.height * rng.range(0.4, 0.9));
-        const size = rng.range(0.2, 3);
-        ctx.globalAlpha = rng.range(0.1, 0.9);
-        ctx.beginPath();
-        ctx.arc(x, y, size, 0, Math.PI * 2);
-        ctx.fill();
+        const size = rng.range(0.5, 2.5);
+        ctx.globalAlpha = rng.range(0.2, 0.9);
+        
+        if (rng.boolean(0.2)) {
+            // Sparkle / 4-point star
+            ctx.beginPath();
+            ctx.moveTo(x, y - size*3);
+            ctx.quadraticCurveTo(x, y, x + size*3, y);
+            ctx.quadraticCurveTo(x, y, x, y + size*3);
+            ctx.quadraticCurveTo(x, y, x - size*3, y);
+            ctx.quadraticCurveTo(x, y, x, y - size*3);
+            ctx.fill();
+        } else {
+            // Normal dot star
+            ctx.beginPath();
+            ctx.arc(x, y, size, 0, Math.PI * 2);
+            ctx.fill();
+        }
     }
     ctx.globalAlpha = 1.0;
 }
@@ -265,6 +283,9 @@ function renderCelestial(palette, isMain) {
     const radius = isMain ? rng.range(60, 150) : rng.range(10, 40);
 
     if (isMain) {
+        state.lightX = x;
+        state.lightY = y;
+        
         const glow = ctx.createRadialGradient(x, y, radius, x, y, radius * 3);
         glow.addColorStop(0, palette.accent + '44');
         glow.addColorStop(1, 'transparent');
@@ -278,15 +299,6 @@ function renderCelestial(palette, isMain) {
     ctx.beginPath();
     ctx.arc(x, y, radius, 0, Math.PI * 2);
     ctx.fill();
-
-    // Random rings
-    if (rng.boolean(0.3)) {
-        ctx.strokeStyle = palette.accent + '88';
-        ctx.lineWidth = rng.range(2, 8);
-        ctx.beginPath();
-        ctx.ellipse(x, y, radius * rng.range(1.5, 2.5), radius * rng.range(0.2, 0.5), rng.range(0, Math.PI), 0, Math.PI * 2);
-        ctx.stroke();
-    }
 }
 
 function renderMountainLayer(index, total, color, alpha) {
@@ -311,7 +323,7 @@ function renderMountainLayer(index, total, color, alpha) {
     }
 
     ctx.fillStyle = color;
-    ctx.globalAlpha = Math.max(0.2, alpha);
+    ctx.globalAlpha = 1.0;
     ctx.beginPath();
     ctx.moveTo(0, height);
     for (let i = 0; i <= segments; i++) {
@@ -320,6 +332,111 @@ function renderMountainLayer(index, total, color, alpha) {
     ctx.lineTo(width, height);
     ctx.closePath();
     ctx.fill();
+
+    // Dynamic Rim Lighting from Celestial Body
+    if (state.lightX !== null) {
+        let currentStroke = [];
+        const strokes = [];
+        
+        for (let i = 0; i < segments; i++) {
+            const x1 = (i / segments) * width;
+            const y1 = points[i];
+            const x2 = ((i + 1) / segments) * width;
+            // Calculate MACRO slope to ignore the fractal micro-jaggedness
+            // This prevents the line from breaking at every tiny bump
+            const step = Math.max(1, Math.floor(segments / 16));
+            const lookBehind = Math.max(0, i - step);
+            const lookAhead = Math.min(segments, i + step);
+            const macroY1 = points[lookBehind];
+            const macroY2 = points[lookAhead];
+
+            // Determine if the macro-slope faces the light source
+            const facesLight = (x1 < state.lightX && macroY1 > macroY2) || (x1 > state.lightX && macroY2 > macroY1);
+            
+            if (facesLight) {
+                if (currentStroke.length === 0) {
+                    currentStroke.push({x: x1, y: y1});
+                }
+                currentStroke.push({x: x2, y: y2});
+            } else {
+                if (currentStroke.length > 0) {
+                    strokes.push(currentStroke);
+                    currentStroke = [];
+                }
+            }
+        }
+        if (currentStroke.length > 0) strokes.push(currentStroke);
+
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        
+        for (let stroke of strokes) {
+            // Eliminate short glares entirely. Only keep medium/long strokes.
+            // Segments count is between 64 and 256. A length of 10 ensures it spans a decent chunk.
+            if (stroke.length < 10) continue;
+            
+            const cx = (stroke[0].x + stroke[stroke.length-1].x) / 2;
+            const cy = (stroke[0].y + stroke[stroke.length-1].y) / 2;
+            
+            const dist = Math.hypot(cx - state.lightX, cy - state.lightY);
+            const maxDist = canvas.width * 0.8;
+            const baseIntensity = Math.max(0, 1 - (dist / maxDist));
+            
+            if (baseIntensity < 0.05) continue;
+            
+            // Create a gradient so the stroke fades out smoothly at both ends
+            const grad = ctx.createLinearGradient(stroke[0].x, stroke[0].y, stroke[stroke.length-1].x, stroke[stroke.length-1].y);
+            const peakOpacity = baseIntensity * rng.range(0.3, 1.0); // varied brightness
+            
+            grad.addColorStop(0, `rgba(255, 255, 255, 0)`);
+            grad.addColorStop(0.2, `rgba(255, 255, 255, ${peakOpacity})`);
+            grad.addColorStop(0.8, `rgba(255, 255, 255, ${peakOpacity})`);
+            grad.addColorStop(1, `rgba(255, 255, 255, 0)`);
+            
+            ctx.beginPath();
+            ctx.moveTo(stroke[0].x, stroke[0].y);
+            for (let i = 1; i < stroke.length; i++) {
+                ctx.lineTo(stroke[i].x, stroke[i].y);
+            }
+            
+            ctx.strokeStyle = grad;
+            ctx.lineWidth = rng.range(0.3, 1.0); // Even thinner lines
+            
+            // Add a soft glow (blur)
+            ctx.shadowColor = `rgba(255, 255, 255, ${peakOpacity})`;
+            ctx.shadowBlur = rng.range(3, 8); // Tighter glow to keep it extremely thin
+            
+            ctx.stroke();
+            
+            // Reset shadow to not affect other drawings
+            ctx.shadowBlur = 0;
+        }
+    }
+
+    // Add random trees to the front-most layers
+    if (index >= total - 2) {
+        const treeCount = rng.int(10, 40);
+        ctx.fillStyle = rng.choice(['#000000', color, palette.terrain[0]]);
+        ctx.globalAlpha = 1.0;
+        for(let t = 0; t < treeCount; t++) {
+            const pxIndex = rng.int(0, segments);
+            const tx = (pxIndex / segments) * width;
+            const ty = points[pxIndex] + rng.range(0, height*0.02); // sink slightly into ground
+            
+            // Abstract geometric pine tree
+            const twidth = width * rng.range(0.005, 0.015);
+            const theight = height * rng.range(0.05, 0.15);
+            
+            // Randomly flip tree direction slightly for wind effect
+            const wind = rng.range(-twidth*0.5, twidth*0.5);
+            
+            ctx.beginPath();
+            ctx.moveTo(tx + wind, ty - theight);
+            ctx.lineTo(tx + twidth, ty);
+            ctx.lineTo(tx - twidth, ty);
+            ctx.fill();
+        }
+    }
     ctx.globalAlpha = 1.0;
 }
 
@@ -434,12 +551,6 @@ function renderHead(cx, cy, scale, palette) {
         ctx.bezierCurveTo(cx - headWidth*1.2, cy + headHeight, cx - headWidth*1.5, cy - headHeight*0.5, cx, cy - headHeight);
         ctx.closePath();
     }
-    ctx.fill();
-
-    // Neck shadow
-    ctx.fillStyle = 'rgba(0,0,0,0.15)';
-    ctx.beginPath();
-    ctx.ellipse(cx, cy + scale * 0.3, headWidth * rng.range(0.4, 0.8), scale * rng.range(0.1, 0.2), 0, 0, Math.PI, false);
     ctx.fill();
 }
 

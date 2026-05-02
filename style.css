@@ -142,7 +142,7 @@ button {
     display: flex;
     border-radius: var(--radius-md);
     overflow: hidden;
-    border: 1px solid var(--glass-border);
+    /* Removed the border entirely */
 }
 
 .palette-item {
@@ -150,7 +150,8 @@ button {
     height: 28px;
     cursor: pointer;
     background: var(--c1);
-    transition: opacity 0.2s;
+    transition: opacity 0.2s, transform 0.2s;
+    position: relative;
 }
 
 .palette-item:hover {
@@ -158,7 +159,8 @@ button {
 }
 
 .palette-item.active {
-    box-shadow: inset 0 0 0 2px rgba(255,255,255,0.8);
+    z-index: 2;
+    box-shadow: inset 0 0 0 2px #fff, 0 0 12px rgba(255, 255, 255, 0.4);
 }
 
 .mode-toggle {
@@ -170,7 +172,9 @@ button {
     cursor: pointer;
 }
 .mode-btn input {
-    display: none;
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
 }
 .mode-btn span {
     display: flex;
@@ -258,11 +262,17 @@ footer {
         top: auto;
         bottom: 1rem;
         width: auto;
-        height: auto;
-        padding: 1.5rem;
-        gap: 1.5rem;
+        padding: 0.75rem;
+        gap: 0.75rem;
     }
-    header, .control-group:nth-child(2) {
+    header {
         display: none;
+    }
+    .palette-item {
+        height: 24px;
+    }
+    .mode-btn span {
+        padding: 0.35rem;
+        font-size: 0.75rem;
     }
 }
