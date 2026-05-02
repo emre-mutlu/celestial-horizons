@@ -560,22 +560,22 @@ function renderBody(cx, cy, scale, palette) {
     if (bodyType === 0) {
         // Round shoulders going to the bottom
         ctx.moveTo(cx - shoulderWidth, cy + bodyHeight);
-        ctx.lineTo(cx - shoulderWidth, cy + scale * 1.0);
-        ctx.ellipse(cx, cy + scale * 1.0, shoulderWidth, scale * rng.range(0.5, 1.0), 0, Math.PI, 0);
+        ctx.lineTo(cx - shoulderWidth, cy + scale * 0.6);
+        ctx.ellipse(cx, cy + scale * 0.6, shoulderWidth, scale * rng.range(0.4, 0.8), 0, Math.PI, 0);
         ctx.lineTo(cx + shoulderWidth, cy + bodyHeight);
         ctx.closePath();
     } else if (bodyType === 1) {
-        ctx.roundRect(cx - shoulderWidth, cy + scale * 0.4, shoulderWidth * 2, bodyHeight, [scale * rng.range(0, 0.5), scale * rng.range(0, 0.5), 0, 0]);
+        ctx.roundRect(cx - shoulderWidth, cy + scale * 0.1, shoulderWidth * 2, bodyHeight, [scale * rng.range(0, 0.5), scale * rng.range(0, 0.5), 0, 0]);
     } else if (bodyType === 2) {
         ctx.moveTo(cx - shoulderWidth, cy + bodyHeight);
-        ctx.lineTo(cx - shoulderWidth * rng.range(0.2, 0.8), cy + scale * 0.4);
-        ctx.lineTo(cx + shoulderWidth * rng.range(0.2, 0.8), cy + scale * 0.4);
+        ctx.lineTo(cx - shoulderWidth * rng.range(0.2, 0.8), cy + scale * 0.1);
+        ctx.lineTo(cx + shoulderWidth * rng.range(0.2, 0.8), cy + scale * 0.1);
         ctx.lineTo(cx + shoulderWidth, cy + bodyHeight);
         ctx.closePath();
     } else {
         // Blobby shoulders
         ctx.moveTo(cx - shoulderWidth*1.5, cy + bodyHeight);
-        ctx.bezierCurveTo(cx - shoulderWidth, cy + scale*0.5, cx + shoulderWidth, cy + scale*0.5, cx + shoulderWidth*1.5, cy + bodyHeight);
+        ctx.bezierCurveTo(cx - shoulderWidth, cy + scale*0.2, cx + shoulderWidth, cy + scale*0.2, cx + shoulderWidth*1.5, cy + bodyHeight);
         ctx.closePath();
     }
     ctx.fill();
@@ -585,11 +585,11 @@ function renderBody(cx, cy, scale, palette) {
         ctx.fillStyle = rng.choice(palette.clothes);
         ctx.beginPath();
         if (rng.boolean()) {
-            ctx.arc(cx, cy + scale * rng.range(0.3, 0.6), scale * rng.range(0.2, 0.5), 0, Math.PI, false);
+            ctx.arc(cx, cy + scale * rng.range(0.1, 0.4), scale * rng.range(0.2, 0.5), 0, Math.PI, false);
         } else {
-            ctx.moveTo(cx, cy + scale * rng.range(0.8, 1.2));
-            ctx.lineTo(cx - scale*0.4, cy + scale * 0.4);
-            ctx.lineTo(cx + scale*0.4, cy + scale * 0.4);
+            ctx.moveTo(cx, cy + scale * rng.range(0.4, 0.8));
+            ctx.lineTo(cx - scale*0.4, cy + scale * 0.1);
+            ctx.lineTo(cx + scale*0.4, cy + scale * 0.1);
             ctx.closePath();
         }
         ctx.fill();
