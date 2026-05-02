@@ -12,26 +12,24 @@
 <body>
     <main>
         <canvas id="artCanvas"></canvas>
+        <div class="mode-overlay">
+            <div class="mode-toggle">
+                <label class="mode-btn mode-horizon">
+                    <input type="radio" name="genMode" value="horizon" checked> 
+                    <span>Horizon</span>
+                </label>
+                <label class="mode-btn mode-persona">
+                    <input type="radio" name="genMode" value="persona"> 
+                    <span>Persona</span>
+                </label>
+            </div>
+        </div>
         
         <div class="controls-overlay">
             <header>
                 <h1 id="appTitle">Celestial Horizons</h1>
                 <p id="appSubtitle">Algorithmic Art Engine</p>
             </header>
-
-            <section class="control-group">
-                <label>Generator Mode</label>
-                <div class="mode-toggle">
-                    <label class="mode-btn mode-horizon">
-                        <input type="radio" name="genMode" value="horizon" checked> 
-                        <span>Horizon</span>
-                    </label>
-                    <label class="mode-btn mode-persona">
-                        <input type="radio" name="genMode" value="persona"> 
-                        <span>Persona</span>
-                    </label>
-                </div>
-            </section>
 
             <section class="control-group">
                 <label id="paletteLabel">Atmosphere Palette</label>
