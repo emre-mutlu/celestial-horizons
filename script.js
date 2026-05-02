@@ -198,10 +198,10 @@ function renderHorizon() {
 
 function drawGrid() {
     const { ctx, canvas, rng } = state;
-    const gridSize = rng.choice([20, 25, 30, 35]); 
+    const gridSize = rng.choice([60, 80, 100]); // Much wider grid
     
     // Subtle dots at grid intersections
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
     for(let x=0; x<canvas.width; x+=gridSize) {
         for(let y=0; y<canvas.height; y+=gridSize) {
             if (rng.boolean(0.85)) { 
@@ -216,21 +216,21 @@ function drawGrid() {
     ctx.lineWidth = 1;
     for(let i=0; i<canvas.width; i+=gridSize) {
         if (rng.boolean(0.1)) continue; 
-        ctx.strokeStyle = rng.boolean(0.2) ? 'rgba(255, 255, 255, 0.06)' : 'rgba(255, 255, 255, 0.02)';
+        ctx.strokeStyle = rng.boolean(0.2) ? 'rgba(255, 255, 255, 0.03)' : 'rgba(255, 255, 255, 0.01)';
         ctx.setLineDash(rng.boolean(0.5) ? [2, 4] : []);
         ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke();
     }
     for(let i=0; i<canvas.height; i+=gridSize) {
         if (rng.boolean(0.1)) continue;
-        ctx.strokeStyle = rng.boolean(0.2) ? 'rgba(255, 255, 255, 0.06)' : 'rgba(255, 255, 255, 0.02)';
+        ctx.strokeStyle = rng.boolean(0.2) ? 'rgba(255, 255, 255, 0.03)' : 'rgba(255, 255, 255, 0.01)';
         ctx.setLineDash(rng.boolean(0.5) ? [2, 4] : []);
         ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(canvas.width, i); ctx.stroke();
     }
     ctx.setLineDash([]); 
 
     // Occasional sci-fi crosshairs
-    const crosshairCount = rng.int(5, 20);
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+    const crosshairCount = rng.int(3, 10);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
     for(let i=0; i<crosshairCount; i++) {
         const cx = Math.floor(rng.range(0, canvas.width) / gridSize) * gridSize;
         const cy = Math.floor(rng.range(0, canvas.height) / gridSize) * gridSize;
